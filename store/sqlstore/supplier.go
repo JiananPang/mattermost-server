@@ -69,6 +69,8 @@ const (
 )
 
 type SqlSupplierStores struct {
+	extRef               store.ExtRefStore
+	secret               store.SecretStore
 	team                 store.TeamStore
 	channel              store.ChannelStore
 	post                 store.PostStore
@@ -87,6 +89,8 @@ type SqlSupplierStores struct {
 	license              store.LicenseStore
 	token                store.TokenStore
 	emoji                store.EmojiStore
+	emojiAccess          store.EmojiAccessStore
+	publicEmoji          store.PublicEmojiStore
 	status               store.StatusStore
 	fileInfo             store.FileInfoStore
 	reaction             store.ReactionStore
@@ -137,6 +141,8 @@ func NewSqlSupplier(settings model.SqlSettings, metrics einterfaces.MetricsInter
 
 	supplier.initConnection()
 
+	supplier.stores.extRef = newSqlExtRefStore(supplier, metrics)
+	supplier.stores.secret = newSqlSecretStore(supplier, metrics)
 	supplier.stores.team = newSqlTeamStore(supplier)
 	supplier.stores.channel = newSqlChannelStore(supplier, metrics)
 	supplier.stores.post = newSqlPostStore(supplier, metrics)
@@ -155,6 +161,8 @@ func NewSqlSupplier(settings model.SqlSettings, metrics einterfaces.MetricsInter
 	supplier.stores.license = newSqlLicenseStore(supplier)
 	supplier.stores.token = newSqlTokenStore(supplier)
 	supplier.stores.emoji = newSqlEmojiStore(supplier, metrics)
+	supplier.stores.emojiAccess = newSqlEmojiAccessStore(supplier, metrics)
+	supplier.stores.publicEmoji = newSqlPublicEmojiStore(supplier, metrics)
 	supplier.stores.status = newSqlStatusStore(supplier)
 	supplier.stores.fileInfo = newSqlFileInfoStore(supplier, metrics)
 	supplier.stores.job = newSqlJobStore(supplier)
@@ -183,6 +191,8 @@ func NewSqlSupplier(settings model.SqlSettings, metrics einterfaces.MetricsInter
 		os.Exit(EXIT_GENERIC_FAILURE)
 	}
 
+	supplier.stores.extRef.(*SqlExtRefStore).createIndexesIfNotExists()
+	supplier.stores.secret.(*SqlSecretStore).createIndexesIfNotExists()
 	supplier.stores.team.(*SqlTeamStore).createIndexesIfNotExists()
 	supplier.stores.channel.(*SqlChannelStore).createIndexesIfNotExists()
 	supplier.stores.post.(*SqlPostStore).createIndexesIfNotExists()
@@ -200,6 +210,8 @@ func NewSqlSupplier(settings model.SqlSettings, metrics einterfaces.MetricsInter
 	supplier.stores.license.(*SqlLicenseStore).createIndexesIfNotExists()
 	supplier.stores.token.(*SqlTokenStore).createIndexesIfNotExists()
 	supplier.stores.emoji.(*SqlEmojiStore).createIndexesIfNotExists()
+	supplier.stores.emojiAccess.(*SqlEmojiAccessStore).createIndexesIfNotExists()
+	supplier.stores.publicEmoji.(*SqlPublicEmojiStore).createIndexesIfNotExists()
 	supplier.stores.status.(*SqlStatusStore).createIndexesIfNotExists()
 	supplier.stores.fileInfo.(*SqlFileInfoStore).createIndexesIfNotExists()
 	supplier.stores.job.(*SqlJobStore).createIndexesIfNotExists()
@@ -1048,6 +1060,14 @@ func (ss *SqlSupplier) UnlockFromMaster() {
 	ss.lockedToMaster = false
 }
 
+func (ss *SqlSupplier) ExtRef() store.ExtRefStore {
+	return ss.stores.extRef
+}
+
+func (ss *SqlSupplier) Secret() store.SecretStore {
+	return ss.stores.secret
+}
+
 func (ss *SqlSupplier) Team() store.TeamStore {
 	return ss.stores.team
 }
@@ -1118,6 +1138,13 @@ func (ss *SqlSupplier) Token() store.TokenStore {
 
 func (ss *SqlSupplier) Emoji() store.EmojiStore {
 	return ss.stores.emoji
+}
+
+func (ss *SqlSupplier) EmojiAccess() store.EmojiAccessStore {
+	return ss.stores.emojiAccess
+}
+func (ss *SqlSupplier) PublicEmoji() store.PublicEmojiStore {
+	return ss.stores.publicEmoji
 }
 
 func (ss *SqlSupplier) Status() store.StatusStore {

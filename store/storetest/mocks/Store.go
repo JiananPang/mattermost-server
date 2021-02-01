@@ -206,6 +206,38 @@ func (_m *Store) Emoji() store.EmojiStore {
 	return r0
 }
 
+// EmojiAccess provides a mock function with given fields:
+func (_m *Store) EmojiAccess() store.EmojiAccessStore {
+	ret := _m.Called()
+
+	var r0 store.EmojiAccessStore
+	if rf, ok := ret.Get(0).(func() store.EmojiAccessStore); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(store.EmojiAccessStore)
+		}
+	}
+
+	return r0
+}
+
+// ExtRef provides a mock function with given fields:
+func (_m *Store) ExtRef() store.ExtRefStore {
+	ret := _m.Called()
+
+	var r0 store.ExtRefStore
+	if rf, ok := ret.Get(0).(func() store.ExtRefStore); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(store.ExtRefStore)
+		}
+	}
+
+	return r0
+}
+
 // FileInfo provides a mock function with given fields:
 func (_m *Store) FileInfo() store.FileInfoStore {
 	ret := _m.Called()
@@ -395,6 +427,22 @@ func (_m *Store) Preference() store.PreferenceStore {
 	return r0
 }
 
+// PublicEmoji provides a mock function with given fields:
+func (_m *Store) PublicEmoji() store.PublicEmojiStore {
+	ret := _m.Called()
+
+	var r0 store.PublicEmojiStore
+	if rf, ok := ret.Get(0).(func() store.PublicEmojiStore); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(store.PublicEmojiStore)
+		}
+	}
+
+	return r0
+}
+
 // Reaction provides a mock function with given fields:
 func (_m *Store) Reaction() store.ReactionStore {
 	ret := _m.Called()
@@ -442,6 +490,22 @@ func (_m *Store) Scheme() store.SchemeStore {
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(store.SchemeStore)
+		}
+	}
+
+	return r0
+}
+
+// Secret provides a mock function with given fields:
+func (_m *Store) Secret() store.SecretStore {
+	ret := _m.Called()
+
+	var r0 store.SecretStore
+	if rf, ok := ret.Get(0).(func() store.SecretStore); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(store.SecretStore)
 		}
 	}
 

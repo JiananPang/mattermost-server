@@ -27,6 +27,8 @@ type OpenTracingLayer struct {
 	CommandWebhookStore       store.CommandWebhookStore
 	ComplianceStore           store.ComplianceStore
 	EmojiStore                store.EmojiStore
+	EmojiAccessStore          store.EmojiAccessStore
+	ExtRefStore               store.ExtRefStore
 	FileInfoStore             store.FileInfoStore
 	GroupStore                store.GroupStore
 	JobStore                  store.JobStore
@@ -36,9 +38,11 @@ type OpenTracingLayer struct {
 	PluginStore               store.PluginStore
 	PostStore                 store.PostStore
 	PreferenceStore           store.PreferenceStore
+	PublicEmojiStore          store.PublicEmojiStore
 	ReactionStore             store.ReactionStore
 	RoleStore                 store.RoleStore
 	SchemeStore               store.SchemeStore
+	SecretStore               store.SecretStore
 	SessionStore              store.SessionStore
 	StatusStore               store.StatusStore
 	SystemStore               store.SystemStore
@@ -87,6 +91,14 @@ func (s *OpenTracingLayer) Emoji() store.EmojiStore {
 	return s.EmojiStore
 }
 
+func (s *OpenTracingLayer) EmojiAccess() store.EmojiAccessStore {
+	return s.EmojiAccessStore
+}
+
+func (s *OpenTracingLayer) ExtRef() store.ExtRefStore {
+	return s.ExtRefStore
+}
+
 func (s *OpenTracingLayer) FileInfo() store.FileInfoStore {
 	return s.FileInfoStore
 }
@@ -123,6 +135,10 @@ func (s *OpenTracingLayer) Preference() store.PreferenceStore {
 	return s.PreferenceStore
 }
 
+func (s *OpenTracingLayer) PublicEmoji() store.PublicEmojiStore {
+	return s.PublicEmojiStore
+}
+
 func (s *OpenTracingLayer) Reaction() store.ReactionStore {
 	return s.ReactionStore
 }
@@ -133,6 +149,10 @@ func (s *OpenTracingLayer) Role() store.RoleStore {
 
 func (s *OpenTracingLayer) Scheme() store.SchemeStore {
 	return s.SchemeStore
+}
+
+func (s *OpenTracingLayer) Secret() store.SecretStore {
+	return s.SecretStore
 }
 
 func (s *OpenTracingLayer) Session() store.SessionStore {
@@ -220,6 +240,16 @@ type OpenTracingLayerEmojiStore struct {
 	Root *OpenTracingLayer
 }
 
+type OpenTracingLayerEmojiAccessStore struct {
+	store.EmojiAccessStore
+	Root *OpenTracingLayer
+}
+
+type OpenTracingLayerExtRefStore struct {
+	store.ExtRefStore
+	Root *OpenTracingLayer
+}
+
 type OpenTracingLayerFileInfoStore struct {
 	store.FileInfoStore
 	Root *OpenTracingLayer
@@ -265,6 +295,11 @@ type OpenTracingLayerPreferenceStore struct {
 	Root *OpenTracingLayer
 }
 
+type OpenTracingLayerPublicEmojiStore struct {
+	store.PublicEmojiStore
+	Root *OpenTracingLayer
+}
+
 type OpenTracingLayerReactionStore struct {
 	store.ReactionStore
 	Root *OpenTracingLayer
@@ -277,6 +312,11 @@ type OpenTracingLayerRoleStore struct {
 
 type OpenTracingLayerSchemeStore struct {
 	store.SchemeStore
+	Root *OpenTracingLayer
+}
+
+type OpenTracingLayerSecretStore struct {
+	store.SecretStore
 	Root *OpenTracingLayer
 }
 
@@ -2865,6 +2905,204 @@ func (s *OpenTracingLayerEmojiStore) Search(name string, prefixOnly bool, limit 
 	}
 
 	return result, err
+}
+
+func (s *OpenTracingLayerEmojiAccessStore) DeleteAccessByEmojiId(emojiId string) error {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "EmojiAccessStore.DeleteAccessByEmojiId")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	err := s.EmojiAccessStore.DeleteAccessByEmojiId(emojiId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return err
+}
+
+func (s *OpenTracingLayerEmojiAccessStore) DeleteAccessByUserIdAndEmojiId(userId string, emojiId string) error {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "EmojiAccessStore.DeleteAccessByUserIdAndEmojiId")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	err := s.EmojiAccessStore.DeleteAccessByUserIdAndEmojiId(userId, emojiId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return err
+}
+
+func (s *OpenTracingLayerEmojiAccessStore) GetByUserIdAndEmojiId(userId string, emojiId string) (*model.EmojiAccess, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "EmojiAccessStore.GetByUserIdAndEmojiId")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.EmojiAccessStore.GetByUserIdAndEmojiId(userId, emojiId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerEmojiAccessStore) GetMultipleByUserId(ids []string) ([]*model.EmojiAccess, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "EmojiAccessStore.GetMultipleByUserId")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.EmojiAccessStore.GetMultipleByUserId(ids)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerEmojiAccessStore) Save(emoji_access *model.EmojiAccess) (*model.EmojiAccess, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "EmojiAccessStore.Save")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.EmojiAccessStore.Save(emoji_access)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerExtRefStore) GetByAliasUserId(aliasUserId string) (*model.ExtRef, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "ExtRefStore.GetByAliasUserId")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.ExtRefStore.GetByAliasUserId(aliasUserId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerExtRefStore) GetByExtIdAndPlatform(externalId string, externalPlatform string) (*model.ExtRef, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "ExtRefStore.GetByExtIdAndPlatform")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.ExtRefStore.GetByExtIdAndPlatform(externalId, externalPlatform)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerExtRefStore) GetByRealUserIdAndPlatform(realUserId string, externalPlatform string) (*model.ExtRef, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "ExtRefStore.GetByRealUserIdAndPlatform")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.ExtRefStore.GetByRealUserIdAndPlatform(realUserId, externalPlatform)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerExtRefStore) Save(ext_ref *model.ExtRef) (*model.ExtRef, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "ExtRefStore.Save")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.ExtRefStore.Save(ext_ref)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerExtRefStore) Unlink(realUserId string, externalPlatform string) error {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "ExtRefStore.Unlink")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	err := s.ExtRefStore.Unlink(realUserId, externalPlatform)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return err
+}
+
+func (s *OpenTracingLayerExtRefStore) UpdateRealId(realUserId string, externalId string, externalPlatform string) error {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "ExtRefStore.UpdateRealId")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	err := s.ExtRefStore.UpdateRealId(realUserId, externalId, externalPlatform)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return err
 }
 
 func (s *OpenTracingLayerFileInfoStore) AttachToPost(fileId string, postId string, creatorId string) error {
@@ -5527,6 +5765,73 @@ func (s *OpenTracingLayerPreferenceStore) Save(preferences *model.Preferences) e
 	return err
 }
 
+func (s *OpenTracingLayerPublicEmojiStore) CheckIsPublicEmojis(emojiId string) bool {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "PublicEmojiStore.CheckIsPublicEmojis")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result := s.PublicEmojiStore.CheckIsPublicEmojis(emojiId)
+	return result
+}
+
+func (s *OpenTracingLayerPublicEmojiStore) DeleteAccessByEmojiId(emojiId string) error {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "PublicEmojiStore.DeleteAccessByEmojiId")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	err := s.PublicEmojiStore.DeleteAccessByEmojiId(emojiId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return err
+}
+
+func (s *OpenTracingLayerPublicEmojiStore) GetAllPublicEmojis() ([]*model.PublicEmoji, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "PublicEmojiStore.GetAllPublicEmojis")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.PublicEmojiStore.GetAllPublicEmojis()
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerPublicEmojiStore) Save(public_emoji *model.PublicEmoji) (*model.PublicEmoji, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "PublicEmojiStore.Save")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.PublicEmojiStore.Save(public_emoji)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
 func (s *OpenTracingLayerReactionStore) BulkGetForPosts(postIds []string) ([]*model.Reaction, error) {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "ReactionStore.BulkGetForPosts")
@@ -5951,6 +6256,24 @@ func (s *OpenTracingLayerSchemeStore) Save(scheme *model.Scheme) (*model.Scheme,
 
 	defer span.Finish()
 	result, err := s.SchemeStore.Save(scheme)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerSecretStore) GetBySecretName(secretName string) (*model.Secret, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "SecretStore.GetBySecretName")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.SecretStore.GetBySecretName(secretName)
 	if err != nil {
 		span.LogFields(spanlog.Error(err))
 		ext.Error.Set(span, true)
@@ -9476,6 +9799,8 @@ func New(childStore store.Store, ctx context.Context) *OpenTracingLayer {
 	newStore.CommandWebhookStore = &OpenTracingLayerCommandWebhookStore{CommandWebhookStore: childStore.CommandWebhook(), Root: &newStore}
 	newStore.ComplianceStore = &OpenTracingLayerComplianceStore{ComplianceStore: childStore.Compliance(), Root: &newStore}
 	newStore.EmojiStore = &OpenTracingLayerEmojiStore{EmojiStore: childStore.Emoji(), Root: &newStore}
+	newStore.EmojiAccessStore = &OpenTracingLayerEmojiAccessStore{EmojiAccessStore: childStore.EmojiAccess(), Root: &newStore}
+	newStore.ExtRefStore = &OpenTracingLayerExtRefStore{ExtRefStore: childStore.ExtRef(), Root: &newStore}
 	newStore.FileInfoStore = &OpenTracingLayerFileInfoStore{FileInfoStore: childStore.FileInfo(), Root: &newStore}
 	newStore.GroupStore = &OpenTracingLayerGroupStore{GroupStore: childStore.Group(), Root: &newStore}
 	newStore.JobStore = &OpenTracingLayerJobStore{JobStore: childStore.Job(), Root: &newStore}
@@ -9485,9 +9810,11 @@ func New(childStore store.Store, ctx context.Context) *OpenTracingLayer {
 	newStore.PluginStore = &OpenTracingLayerPluginStore{PluginStore: childStore.Plugin(), Root: &newStore}
 	newStore.PostStore = &OpenTracingLayerPostStore{PostStore: childStore.Post(), Root: &newStore}
 	newStore.PreferenceStore = &OpenTracingLayerPreferenceStore{PreferenceStore: childStore.Preference(), Root: &newStore}
+	newStore.PublicEmojiStore = &OpenTracingLayerPublicEmojiStore{PublicEmojiStore: childStore.PublicEmoji(), Root: &newStore}
 	newStore.ReactionStore = &OpenTracingLayerReactionStore{ReactionStore: childStore.Reaction(), Root: &newStore}
 	newStore.RoleStore = &OpenTracingLayerRoleStore{RoleStore: childStore.Role(), Root: &newStore}
 	newStore.SchemeStore = &OpenTracingLayerSchemeStore{SchemeStore: childStore.Scheme(), Root: &newStore}
+	newStore.SecretStore = &OpenTracingLayerSecretStore{SecretStore: childStore.Secret(), Root: &newStore}
 	newStore.SessionStore = &OpenTracingLayerSessionStore{SessionStore: childStore.Session(), Root: &newStore}
 	newStore.StatusStore = &OpenTracingLayerStatusStore{StatusStore: childStore.Status(), Root: &newStore}
 	newStore.SystemStore = &OpenTracingLayerSystemStore{SystemStore: childStore.System(), Root: &newStore}

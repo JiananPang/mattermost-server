@@ -72,9 +72,12 @@ type SqlStore interface {
 	Close()
 	LockToMaster()
 	UnlockFromMaster()
+	ExtRef() store.ExtRefStore
+	Secret() store.SecretStore
 	Team() store.TeamStore
 	Channel() store.ChannelStore
 	Post() store.PostStore
+	PublicEmoji() store.PublicEmojiStore
 	User() store.UserStore
 	Bot() store.BotStore
 	Audit() store.AuditStore
@@ -90,6 +93,7 @@ type SqlStore interface {
 	License() store.LicenseStore
 	Token() store.TokenStore
 	Emoji() store.EmojiStore
+	EmojiAccess() store.EmojiAccessStore
 	Status() store.StatusStore
 	FileInfo() store.FileInfoStore
 	Reaction() store.ReactionStore

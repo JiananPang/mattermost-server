@@ -27,6 +27,8 @@ type TimerLayer struct {
 	CommandWebhookStore       store.CommandWebhookStore
 	ComplianceStore           store.ComplianceStore
 	EmojiStore                store.EmojiStore
+	EmojiAccessStore          store.EmojiAccessStore
+	ExtRefStore               store.ExtRefStore
 	FileInfoStore             store.FileInfoStore
 	GroupStore                store.GroupStore
 	JobStore                  store.JobStore
@@ -36,9 +38,11 @@ type TimerLayer struct {
 	PluginStore               store.PluginStore
 	PostStore                 store.PostStore
 	PreferenceStore           store.PreferenceStore
+	PublicEmojiStore          store.PublicEmojiStore
 	ReactionStore             store.ReactionStore
 	RoleStore                 store.RoleStore
 	SchemeStore               store.SchemeStore
+	SecretStore               store.SecretStore
 	SessionStore              store.SessionStore
 	StatusStore               store.StatusStore
 	SystemStore               store.SystemStore
@@ -87,6 +91,14 @@ func (s *TimerLayer) Emoji() store.EmojiStore {
 	return s.EmojiStore
 }
 
+func (s *TimerLayer) EmojiAccess() store.EmojiAccessStore {
+	return s.EmojiAccessStore
+}
+
+func (s *TimerLayer) ExtRef() store.ExtRefStore {
+	return s.ExtRefStore
+}
+
 func (s *TimerLayer) FileInfo() store.FileInfoStore {
 	return s.FileInfoStore
 }
@@ -123,6 +135,10 @@ func (s *TimerLayer) Preference() store.PreferenceStore {
 	return s.PreferenceStore
 }
 
+func (s *TimerLayer) PublicEmoji() store.PublicEmojiStore {
+	return s.PublicEmojiStore
+}
+
 func (s *TimerLayer) Reaction() store.ReactionStore {
 	return s.ReactionStore
 }
@@ -133,6 +149,10 @@ func (s *TimerLayer) Role() store.RoleStore {
 
 func (s *TimerLayer) Scheme() store.SchemeStore {
 	return s.SchemeStore
+}
+
+func (s *TimerLayer) Secret() store.SecretStore {
+	return s.SecretStore
 }
 
 func (s *TimerLayer) Session() store.SessionStore {
@@ -220,6 +240,16 @@ type TimerLayerEmojiStore struct {
 	Root *TimerLayer
 }
 
+type TimerLayerEmojiAccessStore struct {
+	store.EmojiAccessStore
+	Root *TimerLayer
+}
+
+type TimerLayerExtRefStore struct {
+	store.ExtRefStore
+	Root *TimerLayer
+}
+
 type TimerLayerFileInfoStore struct {
 	store.FileInfoStore
 	Root *TimerLayer
@@ -265,6 +295,11 @@ type TimerLayerPreferenceStore struct {
 	Root *TimerLayer
 }
 
+type TimerLayerPublicEmojiStore struct {
+	store.PublicEmojiStore
+	Root *TimerLayer
+}
+
 type TimerLayerReactionStore struct {
 	store.ReactionStore
 	Root *TimerLayer
@@ -277,6 +312,11 @@ type TimerLayerRoleStore struct {
 
 type TimerLayerSchemeStore struct {
 	store.SchemeStore
+	Root *TimerLayer
+}
+
+type TimerLayerSecretStore struct {
+	store.SecretStore
 	Root *TimerLayer
 }
 
@@ -2623,6 +2663,182 @@ func (s *TimerLayerEmojiStore) Search(name string, prefixOnly bool, limit int) (
 		s.Root.Metrics.ObserveStoreMethodDuration("EmojiStore.Search", success, elapsed)
 	}
 	return result, err
+}
+
+func (s *TimerLayerEmojiAccessStore) DeleteAccessByEmojiId(emojiId string) error {
+	start := timemodule.Now()
+
+	err := s.EmojiAccessStore.DeleteAccessByEmojiId(emojiId)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("EmojiAccessStore.DeleteAccessByEmojiId", success, elapsed)
+	}
+	return err
+}
+
+func (s *TimerLayerEmojiAccessStore) DeleteAccessByUserIdAndEmojiId(userId string, emojiId string) error {
+	start := timemodule.Now()
+
+	err := s.EmojiAccessStore.DeleteAccessByUserIdAndEmojiId(userId, emojiId)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("EmojiAccessStore.DeleteAccessByUserIdAndEmojiId", success, elapsed)
+	}
+	return err
+}
+
+func (s *TimerLayerEmojiAccessStore) GetByUserIdAndEmojiId(userId string, emojiId string) (*model.EmojiAccess, error) {
+	start := timemodule.Now()
+
+	result, err := s.EmojiAccessStore.GetByUserIdAndEmojiId(userId, emojiId)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("EmojiAccessStore.GetByUserIdAndEmojiId", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerEmojiAccessStore) GetMultipleByUserId(ids []string) ([]*model.EmojiAccess, error) {
+	start := timemodule.Now()
+
+	result, err := s.EmojiAccessStore.GetMultipleByUserId(ids)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("EmojiAccessStore.GetMultipleByUserId", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerEmojiAccessStore) Save(emoji_access *model.EmojiAccess) (*model.EmojiAccess, error) {
+	start := timemodule.Now()
+
+	result, err := s.EmojiAccessStore.Save(emoji_access)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("EmojiAccessStore.Save", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerExtRefStore) GetByAliasUserId(aliasUserId string) (*model.ExtRef, error) {
+	start := timemodule.Now()
+
+	result, err := s.ExtRefStore.GetByAliasUserId(aliasUserId)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("ExtRefStore.GetByAliasUserId", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerExtRefStore) GetByExtIdAndPlatform(externalId string, externalPlatform string) (*model.ExtRef, error) {
+	start := timemodule.Now()
+
+	result, err := s.ExtRefStore.GetByExtIdAndPlatform(externalId, externalPlatform)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("ExtRefStore.GetByExtIdAndPlatform", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerExtRefStore) GetByRealUserIdAndPlatform(realUserId string, externalPlatform string) (*model.ExtRef, error) {
+	start := timemodule.Now()
+
+	result, err := s.ExtRefStore.GetByRealUserIdAndPlatform(realUserId, externalPlatform)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("ExtRefStore.GetByRealUserIdAndPlatform", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerExtRefStore) Save(ext_ref *model.ExtRef) (*model.ExtRef, error) {
+	start := timemodule.Now()
+
+	result, err := s.ExtRefStore.Save(ext_ref)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("ExtRefStore.Save", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerExtRefStore) Unlink(realUserId string, externalPlatform string) error {
+	start := timemodule.Now()
+
+	err := s.ExtRefStore.Unlink(realUserId, externalPlatform)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("ExtRefStore.Unlink", success, elapsed)
+	}
+	return err
+}
+
+func (s *TimerLayerExtRefStore) UpdateRealId(realUserId string, externalId string, externalPlatform string) error {
+	start := timemodule.Now()
+
+	err := s.ExtRefStore.UpdateRealId(realUserId, externalId, externalPlatform)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("ExtRefStore.UpdateRealId", success, elapsed)
+	}
+	return err
 }
 
 func (s *TimerLayerFileInfoStore) AttachToPost(fileId string, postId string, creatorId string) error {
@@ -5005,6 +5221,70 @@ func (s *TimerLayerPreferenceStore) Save(preferences *model.Preferences) error {
 	return err
 }
 
+func (s *TimerLayerPublicEmojiStore) CheckIsPublicEmojis(emojiId string) bool {
+	start := timemodule.Now()
+
+	result := s.PublicEmojiStore.CheckIsPublicEmojis(emojiId)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if true {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("PublicEmojiStore.CheckIsPublicEmojis", success, elapsed)
+	}
+	return result
+}
+
+func (s *TimerLayerPublicEmojiStore) DeleteAccessByEmojiId(emojiId string) error {
+	start := timemodule.Now()
+
+	err := s.PublicEmojiStore.DeleteAccessByEmojiId(emojiId)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("PublicEmojiStore.DeleteAccessByEmojiId", success, elapsed)
+	}
+	return err
+}
+
+func (s *TimerLayerPublicEmojiStore) GetAllPublicEmojis() ([]*model.PublicEmoji, error) {
+	start := timemodule.Now()
+
+	result, err := s.PublicEmojiStore.GetAllPublicEmojis()
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("PublicEmojiStore.GetAllPublicEmojis", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerPublicEmojiStore) Save(public_emoji *model.PublicEmoji) (*model.PublicEmoji, error) {
+	start := timemodule.Now()
+
+	result, err := s.PublicEmojiStore.Save(public_emoji)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("PublicEmojiStore.Save", success, elapsed)
+	}
+	return result, err
+}
+
 func (s *TimerLayerReactionStore) BulkGetForPosts(postIds []string) ([]*model.Reaction, error) {
 	start := timemodule.Now()
 
@@ -5385,6 +5665,22 @@ func (s *TimerLayerSchemeStore) Save(scheme *model.Scheme) (*model.Scheme, error
 			success = "true"
 		}
 		s.Root.Metrics.ObserveStoreMethodDuration("SchemeStore.Save", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerSecretStore) GetBySecretName(secretName string) (*model.Secret, error) {
+	start := timemodule.Now()
+
+	result, err := s.SecretStore.GetBySecretName(secretName)
+
+	elapsed := float64(timemodule.Since(start)) / float64(timemodule.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("SecretStore.GetBySecretName", success, elapsed)
 	}
 	return result, err
 }
@@ -8570,6 +8866,8 @@ func New(childStore store.Store, metrics einterfaces.MetricsInterface) *TimerLay
 	newStore.CommandWebhookStore = &TimerLayerCommandWebhookStore{CommandWebhookStore: childStore.CommandWebhook(), Root: &newStore}
 	newStore.ComplianceStore = &TimerLayerComplianceStore{ComplianceStore: childStore.Compliance(), Root: &newStore}
 	newStore.EmojiStore = &TimerLayerEmojiStore{EmojiStore: childStore.Emoji(), Root: &newStore}
+	newStore.EmojiAccessStore = &TimerLayerEmojiAccessStore{EmojiAccessStore: childStore.EmojiAccess(), Root: &newStore}
+	newStore.ExtRefStore = &TimerLayerExtRefStore{ExtRefStore: childStore.ExtRef(), Root: &newStore}
 	newStore.FileInfoStore = &TimerLayerFileInfoStore{FileInfoStore: childStore.FileInfo(), Root: &newStore}
 	newStore.GroupStore = &TimerLayerGroupStore{GroupStore: childStore.Group(), Root: &newStore}
 	newStore.JobStore = &TimerLayerJobStore{JobStore: childStore.Job(), Root: &newStore}
@@ -8579,9 +8877,11 @@ func New(childStore store.Store, metrics einterfaces.MetricsInterface) *TimerLay
 	newStore.PluginStore = &TimerLayerPluginStore{PluginStore: childStore.Plugin(), Root: &newStore}
 	newStore.PostStore = &TimerLayerPostStore{PostStore: childStore.Post(), Root: &newStore}
 	newStore.PreferenceStore = &TimerLayerPreferenceStore{PreferenceStore: childStore.Preference(), Root: &newStore}
+	newStore.PublicEmojiStore = &TimerLayerPublicEmojiStore{PublicEmojiStore: childStore.PublicEmoji(), Root: &newStore}
 	newStore.ReactionStore = &TimerLayerReactionStore{ReactionStore: childStore.Reaction(), Root: &newStore}
 	newStore.RoleStore = &TimerLayerRoleStore{RoleStore: childStore.Role(), Root: &newStore}
 	newStore.SchemeStore = &TimerLayerSchemeStore{SchemeStore: childStore.Scheme(), Root: &newStore}
+	newStore.SecretStore = &TimerLayerSecretStore{SecretStore: childStore.Secret(), Root: &newStore}
 	newStore.SessionStore = &TimerLayerSessionStore{SessionStore: childStore.Session(), Root: &newStore}
 	newStore.StatusStore = &TimerLayerStatusStore{StatusStore: childStore.Status(), Root: &newStore}
 	newStore.SystemStore = &TimerLayerSystemStore{SystemStore: childStore.System(), Root: &newStore}

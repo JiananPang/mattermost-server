@@ -29,6 +29,8 @@ type RetryLayer struct {
 	CommandWebhookStore       store.CommandWebhookStore
 	ComplianceStore           store.ComplianceStore
 	EmojiStore                store.EmojiStore
+	EmojiAccessStore          store.EmojiAccessStore
+	ExtRefStore               store.ExtRefStore
 	FileInfoStore             store.FileInfoStore
 	GroupStore                store.GroupStore
 	JobStore                  store.JobStore
@@ -38,9 +40,11 @@ type RetryLayer struct {
 	PluginStore               store.PluginStore
 	PostStore                 store.PostStore
 	PreferenceStore           store.PreferenceStore
+	PublicEmojiStore          store.PublicEmojiStore
 	ReactionStore             store.ReactionStore
 	RoleStore                 store.RoleStore
 	SchemeStore               store.SchemeStore
+	SecretStore               store.SecretStore
 	SessionStore              store.SessionStore
 	StatusStore               store.StatusStore
 	SystemStore               store.SystemStore
@@ -89,6 +93,14 @@ func (s *RetryLayer) Emoji() store.EmojiStore {
 	return s.EmojiStore
 }
 
+func (s *RetryLayer) EmojiAccess() store.EmojiAccessStore {
+	return s.EmojiAccessStore
+}
+
+func (s *RetryLayer) ExtRef() store.ExtRefStore {
+	return s.ExtRefStore
+}
+
 func (s *RetryLayer) FileInfo() store.FileInfoStore {
 	return s.FileInfoStore
 }
@@ -125,6 +137,10 @@ func (s *RetryLayer) Preference() store.PreferenceStore {
 	return s.PreferenceStore
 }
 
+func (s *RetryLayer) PublicEmoji() store.PublicEmojiStore {
+	return s.PublicEmojiStore
+}
+
 func (s *RetryLayer) Reaction() store.ReactionStore {
 	return s.ReactionStore
 }
@@ -135,6 +151,10 @@ func (s *RetryLayer) Role() store.RoleStore {
 
 func (s *RetryLayer) Scheme() store.SchemeStore {
 	return s.SchemeStore
+}
+
+func (s *RetryLayer) Secret() store.SecretStore {
+	return s.SecretStore
 }
 
 func (s *RetryLayer) Session() store.SessionStore {
@@ -222,6 +242,16 @@ type RetryLayerEmojiStore struct {
 	Root *RetryLayer
 }
 
+type RetryLayerEmojiAccessStore struct {
+	store.EmojiAccessStore
+	Root *RetryLayer
+}
+
+type RetryLayerExtRefStore struct {
+	store.ExtRefStore
+	Root *RetryLayer
+}
+
 type RetryLayerFileInfoStore struct {
 	store.FileInfoStore
 	Root *RetryLayer
@@ -267,6 +297,11 @@ type RetryLayerPreferenceStore struct {
 	Root *RetryLayer
 }
 
+type RetryLayerPublicEmojiStore struct {
+	store.PublicEmojiStore
+	Root *RetryLayer
+}
+
 type RetryLayerReactionStore struct {
 	store.ReactionStore
 	Root *RetryLayer
@@ -279,6 +314,11 @@ type RetryLayerRoleStore struct {
 
 type RetryLayerSchemeStore struct {
 	store.SchemeStore
+	Root *RetryLayer
+}
+
+type RetryLayerSecretStore struct {
+	store.SecretStore
 	Root *RetryLayer
 }
 
@@ -2145,6 +2185,226 @@ func (s *RetryLayerEmojiStore) Search(name string, prefixOnly bool, limit int) (
 		if tries >= 3 {
 			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
 			return result, err
+		}
+	}
+
+}
+
+func (s *RetryLayerEmojiAccessStore) DeleteAccessByEmojiId(emojiId string) error {
+
+	tries := 0
+	for {
+		err := s.EmojiAccessStore.DeleteAccessByEmojiId(emojiId)
+		if err == nil {
+			return nil
+		}
+		if !isRepeatableError(err) {
+			return err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return err
+		}
+	}
+
+}
+
+func (s *RetryLayerEmojiAccessStore) DeleteAccessByUserIdAndEmojiId(userId string, emojiId string) error {
+
+	tries := 0
+	for {
+		err := s.EmojiAccessStore.DeleteAccessByUserIdAndEmojiId(userId, emojiId)
+		if err == nil {
+			return nil
+		}
+		if !isRepeatableError(err) {
+			return err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return err
+		}
+	}
+
+}
+
+func (s *RetryLayerEmojiAccessStore) GetByUserIdAndEmojiId(userId string, emojiId string) (*model.EmojiAccess, error) {
+
+	tries := 0
+	for {
+		result, err := s.EmojiAccessStore.GetByUserIdAndEmojiId(userId, emojiId)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+	}
+
+}
+
+func (s *RetryLayerEmojiAccessStore) GetMultipleByUserId(ids []string) ([]*model.EmojiAccess, error) {
+
+	tries := 0
+	for {
+		result, err := s.EmojiAccessStore.GetMultipleByUserId(ids)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+	}
+
+}
+
+func (s *RetryLayerEmojiAccessStore) Save(emoji_access *model.EmojiAccess) (*model.EmojiAccess, error) {
+
+	tries := 0
+	for {
+		result, err := s.EmojiAccessStore.Save(emoji_access)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+	}
+
+}
+
+func (s *RetryLayerExtRefStore) GetByAliasUserId(aliasUserId string) (*model.ExtRef, error) {
+
+	tries := 0
+	for {
+		result, err := s.ExtRefStore.GetByAliasUserId(aliasUserId)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+	}
+
+}
+
+func (s *RetryLayerExtRefStore) GetByExtIdAndPlatform(externalId string, externalPlatform string) (*model.ExtRef, error) {
+
+	tries := 0
+	for {
+		result, err := s.ExtRefStore.GetByExtIdAndPlatform(externalId, externalPlatform)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+	}
+
+}
+
+func (s *RetryLayerExtRefStore) GetByRealUserIdAndPlatform(realUserId string, externalPlatform string) (*model.ExtRef, error) {
+
+	tries := 0
+	for {
+		result, err := s.ExtRefStore.GetByRealUserIdAndPlatform(realUserId, externalPlatform)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+	}
+
+}
+
+func (s *RetryLayerExtRefStore) Save(ext_ref *model.ExtRef) (*model.ExtRef, error) {
+
+	tries := 0
+	for {
+		result, err := s.ExtRefStore.Save(ext_ref)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+	}
+
+}
+
+func (s *RetryLayerExtRefStore) Unlink(realUserId string, externalPlatform string) error {
+
+	tries := 0
+	for {
+		err := s.ExtRefStore.Unlink(realUserId, externalPlatform)
+		if err == nil {
+			return nil
+		}
+		if !isRepeatableError(err) {
+			return err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return err
+		}
+	}
+
+}
+
+func (s *RetryLayerExtRefStore) UpdateRealId(realUserId string, externalId string, externalPlatform string) error {
+
+	tries := 0
+	for {
+		err := s.ExtRefStore.UpdateRealId(realUserId, externalId, externalPlatform)
+		if err == nil {
+			return nil
+		}
+		if !isRepeatableError(err) {
+			return err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return err
 		}
 	}
 
@@ -4066,6 +4326,72 @@ func (s *RetryLayerPreferenceStore) Save(preferences *model.Preferences) error {
 
 }
 
+func (s *RetryLayerPublicEmojiStore) CheckIsPublicEmojis(emojiId string) bool {
+
+	return s.PublicEmojiStore.CheckIsPublicEmojis(emojiId)
+
+}
+
+func (s *RetryLayerPublicEmojiStore) DeleteAccessByEmojiId(emojiId string) error {
+
+	tries := 0
+	for {
+		err := s.PublicEmojiStore.DeleteAccessByEmojiId(emojiId)
+		if err == nil {
+			return nil
+		}
+		if !isRepeatableError(err) {
+			return err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return err
+		}
+	}
+
+}
+
+func (s *RetryLayerPublicEmojiStore) GetAllPublicEmojis() ([]*model.PublicEmoji, error) {
+
+	tries := 0
+	for {
+		result, err := s.PublicEmojiStore.GetAllPublicEmojis()
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+	}
+
+}
+
+func (s *RetryLayerPublicEmojiStore) Save(public_emoji *model.PublicEmoji) (*model.PublicEmoji, error) {
+
+	tries := 0
+	for {
+		result, err := s.PublicEmojiStore.Save(public_emoji)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+	}
+
+}
+
 func (s *RetryLayerReactionStore) BulkGetForPosts(postIds []string) ([]*model.Reaction, error) {
 
 	tries := 0
@@ -4531,6 +4857,26 @@ func (s *RetryLayerSchemeStore) Save(scheme *model.Scheme) (*model.Scheme, error
 	tries := 0
 	for {
 		result, err := s.SchemeStore.Save(scheme)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+	}
+
+}
+
+func (s *RetryLayerSecretStore) GetBySecretName(secretName string) (*model.Secret, error) {
+
+	tries := 0
+	for {
+		result, err := s.SecretStore.GetBySecretName(secretName)
 		if err == nil {
 			return result, nil
 		}
@@ -6826,6 +7172,8 @@ func New(childStore store.Store) *RetryLayer {
 	newStore.CommandWebhookStore = &RetryLayerCommandWebhookStore{CommandWebhookStore: childStore.CommandWebhook(), Root: &newStore}
 	newStore.ComplianceStore = &RetryLayerComplianceStore{ComplianceStore: childStore.Compliance(), Root: &newStore}
 	newStore.EmojiStore = &RetryLayerEmojiStore{EmojiStore: childStore.Emoji(), Root: &newStore}
+	newStore.EmojiAccessStore = &RetryLayerEmojiAccessStore{EmojiAccessStore: childStore.EmojiAccess(), Root: &newStore}
+	newStore.ExtRefStore = &RetryLayerExtRefStore{ExtRefStore: childStore.ExtRef(), Root: &newStore}
 	newStore.FileInfoStore = &RetryLayerFileInfoStore{FileInfoStore: childStore.FileInfo(), Root: &newStore}
 	newStore.GroupStore = &RetryLayerGroupStore{GroupStore: childStore.Group(), Root: &newStore}
 	newStore.JobStore = &RetryLayerJobStore{JobStore: childStore.Job(), Root: &newStore}
@@ -6835,9 +7183,11 @@ func New(childStore store.Store) *RetryLayer {
 	newStore.PluginStore = &RetryLayerPluginStore{PluginStore: childStore.Plugin(), Root: &newStore}
 	newStore.PostStore = &RetryLayerPostStore{PostStore: childStore.Post(), Root: &newStore}
 	newStore.PreferenceStore = &RetryLayerPreferenceStore{PreferenceStore: childStore.Preference(), Root: &newStore}
+	newStore.PublicEmojiStore = &RetryLayerPublicEmojiStore{PublicEmojiStore: childStore.PublicEmoji(), Root: &newStore}
 	newStore.ReactionStore = &RetryLayerReactionStore{ReactionStore: childStore.Reaction(), Root: &newStore}
 	newStore.RoleStore = &RetryLayerRoleStore{RoleStore: childStore.Role(), Root: &newStore}
 	newStore.SchemeStore = &RetryLayerSchemeStore{SchemeStore: childStore.Scheme(), Root: &newStore}
+	newStore.SecretStore = &RetryLayerSecretStore{SecretStore: childStore.Secret(), Root: &newStore}
 	newStore.SessionStore = &RetryLayerSessionStore{SessionStore: childStore.Session(), Root: &newStore}
 	newStore.StatusStore = &RetryLayerStatusStore{StatusStore: childStore.Status(), Root: &newStore}
 	newStore.SystemStore = &RetryLayerSystemStore{SystemStore: childStore.System(), Root: &newStore}

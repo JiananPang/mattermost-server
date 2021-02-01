@@ -21,6 +21,8 @@ type StoreResult struct {
 }
 
 type Store interface {
+	ExtRef() ExtRefStore
+	Secret() SecretStore
 	Team() TeamStore
 	Channel() ChannelStore
 	Post() PostStore
@@ -39,6 +41,8 @@ type Store interface {
 	License() LicenseStore
 	Token() TokenStore
 	Emoji() EmojiStore
+	EmojiAccess() EmojiAccessStore
+	PublicEmoji() PublicEmojiStore
 	Status() StatusStore
 	FileInfo() FileInfoStore
 	Reaction() ReactionStore
@@ -66,6 +70,19 @@ type Store interface {
 	CheckIntegrity() <-chan model.IntegrityCheckResult
 	SetContext(context context.Context)
 	Context() context.Context
+}
+
+type ExtRefStore interface {
+	GetByExtIdAndPlatform(externalId string, externalPlatform string) (*model.ExtRef, error)
+	GetByRealUserIdAndPlatform(realUserId string, externalPlatform string) (*model.ExtRef, error)
+	UpdateRealId(realUserId string, externalId string, externalPlatform string) error
+	Unlink(realUserId string, externalPlatform string) error
+	Save(ext_ref *model.ExtRef) (*model.ExtRef, error)
+	GetByAliasUserId(aliasUserId string) (*model.ExtRef, error)
+}
+
+type SecretStore interface {
+	GetBySecretName(secretName string) (*model.Secret, error)
 }
 
 type TeamStore interface {
@@ -522,6 +539,21 @@ type EmojiStore interface {
 	GetList(offset, limit int, sort string) ([]*model.Emoji, error)
 	Delete(emoji *model.Emoji, time int64) error
 	Search(name string, prefixOnly bool, limit int) ([]*model.Emoji, error)
+}
+
+type EmojiAccessStore interface {
+	Save(emoji_access *model.EmojiAccess) (*model.EmojiAccess, error)
+	GetByUserIdAndEmojiId(userId string, emojiId string) (*model.EmojiAccess, error)
+	GetMultipleByUserId(ids []string) ([]*model.EmojiAccess, error)
+	DeleteAccessByUserIdAndEmojiId(userId string, emojiId string) error
+	DeleteAccessByEmojiId(emojiId string) error
+}
+
+type PublicEmojiStore interface {
+	Save(public_emoji *model.PublicEmoji) (*model.PublicEmoji, error)
+	GetAllPublicEmojis() ([]*model.PublicEmoji, error)
+	DeleteAccessByEmojiId(emojiId string) error
+	CheckIsPublicEmojis(emojiId string) bool
 }
 
 type StatusStore interface {
